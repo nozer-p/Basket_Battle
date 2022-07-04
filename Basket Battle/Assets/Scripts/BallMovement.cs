@@ -10,8 +10,12 @@ public class BallMovement : MonoBehaviour
     private int countCol;
     public float ForceValue;
 
+    private bool isStart;
+    private bool isFinish;
+
     private void Start()
     {
+        isStart = isFinish = false;
         Physics.defaultMaxDepenetrationVelocity = 100.0f;
         Physics.gravity = new Vector3(0, -25, 0);
         countCol = 0;
@@ -19,11 +23,6 @@ public class BallMovement : MonoBehaviour
         collider = GetComponent<Collider>();
 
         SwipeDetection.SwipeEvent += OnSwipe;
-    }
-
-    private void FixedUpdate()
-    {
-
     }
 
     private void OnSwipe(Vector2 direction, float delta)
@@ -38,10 +37,32 @@ public class BallMovement : MonoBehaviour
         rb.velocity = direction * ForceValue * delta;
         collider.material.bounciness = 0.82f;
     }
-    
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Start")
+        {
+            isStart = true;
+        }
+        if (isStart && other.tag == "Finish")
+        {
+            isFinish = true;
+        }
+    }
+
+    private void Update()
+    {
+        if (isStart && isFinish)
+        {
+            Debug.Log("GOL!");
+            isStart = isFinish = false;
+        }
+
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.gameObject.tag == "Walls")
+        if (collision.collider.gameObject.tag == "Walls" || collision.collider.gameObject.tag == "Basket")
         {
             countCol++;
             if (countCol >= 3 && collider.material.bounciness > 0f)
